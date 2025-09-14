@@ -153,3 +153,52 @@ Yes — **Elasticsearch is one of the most popular systems for full-text search*
 
 📌 So yes, building an inverted index **costs time and resources**, but Elasticsearch is designed to make it fast and scalable.
 That’s also why people sometimes prefer **ClickHouse** for logs — no heavy text analysis/indexing, just fast writes + analytics.
+
+# MYSQL `%...%` syntax is full-text search?
+
+## 🔹 MySQL and `%...%` syntax
+
+If you write something like:
+
+```sql
+SELECT * FROM logs WHERE message LIKE '%login failed%';
+```
+
+* This is **not full-text search**.
+* It’s a **pattern match** using the `LIKE` operator.
+* MySQL has to scan through rows and check each string → **slow for large tables** (no inverted index).
+
+---
+
+## 🔹 MySQL Full-Text Search
+
+MySQL **does** support real full-text search, but with a different syntax:
+
+```sql
+SELECT * FROM logs 
+WHERE MATCH(message) AGAINST('login failed');
+```
+
+* `MATCH(column)` → tells MySQL to use the full-text index on that column.
+* `AGAINST('...')` → specifies the search phrase.
+* Requires a **FULLTEXT index** on the column:
+
+  ```sql
+  ALTER TABLE logs ADD FULLTEXT(message);
+  ```
+
+---
+
+## 🔹 Difference
+
+| Syntax                    | What it does                                           | Performance             |
+| ------------------------- | ------------------------------------------------------ | ----------------------- |
+| `LIKE '%word%'`           | Scans the entire table, checks substrings              | **Slow** on big data    |
+| `MATCH(...) AGAINST(...)` | Uses an **inverted index** (like Elasticsearch/Lucene) | **Fast** for large text |
+
+---
+
+✅ So:
+
+* `%...%` = simple substring search (not full-text search).
+* `MATCH() AGAINST()` = true **full-text search** in MySQL.
