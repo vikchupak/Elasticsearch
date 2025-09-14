@@ -156,8 +156,6 @@ That’s also why people sometimes prefer **ClickHouse** for logs — no heavy t
 
 # MYSQL `%...%` syntax is full-text search?
 
-## 🔹 MySQL and `%...%` syntax
-
 If you write something like:
 
 ```sql
